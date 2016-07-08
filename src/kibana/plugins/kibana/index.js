@@ -2,6 +2,7 @@ define(function (require) {
   // base angular components/directives we expect to be loaded
   require('angular-bootstrap');
   require('services/private');
+  require('angular-local-storage');
   require('components/config/config');
   require('components/courier/courier');
   require('components/filter_bar/filter_bar');
@@ -25,11 +26,12 @@ define(function (require) {
   require('directives/pretty_duration');
   require('directives/rows');
 
+  require('config/auth.interceptor');
   var Notifier = require('components/notify/_notifier');
 
   // ensure that the kibana module requires ui.bootstrap
   require('modules')
-  .get('kibana', ['ui.bootstrap'])
+  .get('kibana', ['ui.bootstrap', 'LocalStorageModule'])
   .config(function ($tooltipProvider, $httpProvider, configFile) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
     $httpProvider.interceptors.push(function () {
@@ -47,7 +49,7 @@ define(function (require) {
       };
     });
   })
-  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
+  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup, Principal, AuthService) {
     return {
       template: require('text!plugins/kibana/kibana.html'),
       controllerAs: 'kibana',
@@ -55,6 +57,17 @@ define(function (require) {
         var _ = require('lodash');
         var self = $rootScope.kibana = this;
         var notify = new Notifier({ location: 'Kibana' });
+        
+        $scope.authenticated = Principal.isAuthenticated();
+
+        $scope.logout = function(){
+          $scope.authenticated = false;
+          AuthService.logout();
+        };
+
+        $rootScope.$on('loggedIn', function(){
+          $scope.authenticated = Principal.isAuthenticated();
+        });
 
         // this is the only way to handle uncaught route.resolve errors
         $rootScope.$on('$routeChangeError', function (event, next, prev, err) {

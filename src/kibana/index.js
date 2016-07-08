@@ -12,6 +12,10 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
+  //Add our login component
+  require('plugins/login/index');
+  require('config/routeSetup');
+
   var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
@@ -38,7 +42,13 @@ define(function (require) {
     // When we need to identify the current session of the app, ef shard preference
     .constant('sessionId', Date.now())
     // attach the route manager's known routes
+    .run(function(RouteSetup){
+      RouteSetup.setup();
+    })
     .config(routes.config)
+    .config(function($httpProvider){
+      $httpProvider.interceptors.push('AuthInterceptor');
+    })
     .config(['ngClipProvider', function (ngClipProvider) {
       ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
     }]);

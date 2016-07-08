@@ -12,6 +12,7 @@ require.config({
     'angular-bindonce': 'bower_components/angular-bindonce/bindonce',
     'angular-bootstrap': 'bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-elastic': 'bower_components/angular-elastic/elastic',
+    'angular-local-storage': 'bower_components/angular-local-storage/dist/angular-local-storage',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
