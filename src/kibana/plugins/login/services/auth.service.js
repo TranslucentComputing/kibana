@@ -6,25 +6,25 @@ define(function (require) {
   var app = require('modules').get('kibana');
 
   require('routes')
-    .when('/login',{
+    .when('/login', {
       template: require('text!plugins/login/index.html'),
       reloadOnSearch: false,
       resolve: {}
     });
 
-  app.factory('AuthService', function loginService($http,Base64, TokenManager, $rootScope, Principal, $location) {
-    var tokenUri = "http://localhost:8080/oauth/token"; //TODO update
+  app.factory('AuthService', function loginService($http, Base64, TokenManager, $rootScope, Principal, $location) {
+    var tokenUri = 'http://localhost:8080/oauth/token'; //TODO update
     return {
       login: function (credentials) {
-        var data = "username=" + credentials.username + "&password="
-          + credentials.password + "&grant_type=password&scope=read%20write&" +
-          "client_secret=KibanaAppSecret&client_id=KibanaApp";
+        var data = 'username=' + credentials.username + '&password='
+          + credentials.password + '&grant_type=password&scope=read%20write&' +
+          'client_secret=KibanaAppSecret&client_id=KibanaApp';
 
         return $http.post(tokenUri, data, {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "Authorization": "Basic " + Base64.encode("KibanaApp" + ':' + "KibanaAppSecret")
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Authorization': 'Basic ' + Base64.encode('KibanaApp' + ':' + 'KibanaAppSecret')
           }
         }).then(function (response) {
           var token = response.data;
@@ -42,9 +42,9 @@ define(function (require) {
         $rootScope.$broadcast('loggedOut');
         Principal.authenticate(null);
 
-        $http.get('/api/logout',{params:{sessionKey:sessionKey}}).then(function () {
+        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {
           TokenManager.clearAll();
-          $location.path("/login");
+          $location.path('/login');
         });
       },
       authorize: function (force) {
@@ -52,7 +52,7 @@ define(function (require) {
           .then(function () {
             var isAuthenticated = Principal.isAuthenticated();
 
-            if(!isAuthenticated){
+            if (!isAuthenticated) {
               $location.path('/login');
             }
 

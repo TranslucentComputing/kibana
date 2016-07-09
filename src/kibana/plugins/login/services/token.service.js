@@ -4,7 +4,7 @@
 define(function (require) {
 
   var app = require('modules').get('kibana');
-  
+
   app.factory('TokenManager', function loginService(localStorageService) {
     return {
       setToken: function (token) {
@@ -22,9 +22,9 @@ define(function (require) {
       clearAll: function () {
         localStorageService.clearAll();
       },
-      getSessionKey: function(){
+      getSessionKey: function () {
         var token = this.getToken();
-        if(token && token.session_key){
+        if (token && token.session_key) {
           return token.session_key;
         }
         else {

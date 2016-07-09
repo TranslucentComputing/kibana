@@ -31,62 +31,65 @@ define(function (require) {
 
   // ensure that the kibana module requires ui.bootstrap
   require('modules')
-  .get('kibana', ['ui.bootstrap', 'LocalStorageModule'])
-  .config(function ($tooltipProvider, $httpProvider, configFile) {
-    $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
-    $httpProvider.interceptors.push(function () {
-      return {
-        request: function (opts) {
-          var kbnXsrfToken = configFile.xsrf_token;
+    .get('kibana', ['ui.bootstrap', 'LocalStorageModule'])
+    .config(function ($tooltipProvider, $httpProvider, configFile) {
+      $tooltipProvider.setTriggers({'mouseenter': 'mouseleave click'});
+      $httpProvider.interceptors.push(function () {
+        return {
+          request: function (opts) {
+            var kbnXsrfToken = configFile.xsrf_token;
 
-          if (kbnXsrfToken) {
-            var headers = opts.headers || (opts.headers = {});
-            headers['kbn-xsrf-token'] = kbnXsrfToken;
+            if (kbnXsrfToken) {
+              var headers = opts.headers || (opts.headers = {});
+              headers['kbn-xsrf-token'] = kbnXsrfToken;
+            }
+
+            return opts;
           }
+        };
+      });
+    })
+    .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup, Principal, AuthService) {
+      return {
+        template: require('text!plugins/kibana/kibana.html'),
+        controllerAs: 'kibana',
+        controller: function ($scope) {
+          var _ = require('lodash');
+          var self = $rootScope.kibana = this;
+          var notify = new Notifier({location: 'Kibana'});
 
-          return opts;
+          Principal.identity()
+            .then(function () {
+              $scope.authenticated = Principal.isAuthenticated();
+            });
+
+          $scope.logout = function () {
+            $scope.authenticated = false;
+            AuthService.logout();
+          };
+
+          $rootScope.$on('loggedIn', function () {
+            $scope.authenticated = Principal.isAuthenticated();
+          });
+
+          // this is the only way to handle uncaught route.resolve errors
+          $rootScope.$on('$routeChangeError', function (event, next, prev, err) {
+            notify.fatal(err);
+          });
+
+          // run init functions before loading the mixins, so that we can ensure that
+          // the environment is ready for them to get and use their dependencies
+          self.ready = Promise.all([kbnSetup(), config.init()])
+            .then(function () {
+              // load some "mixins"
+              var mixinLocals = {$scope: $scope, notify: notify};
+              $injector.invoke(require('plugins/kibana/_init'), self, mixinLocals);
+              $injector.invoke(require('plugins/kibana/_apps'), self, mixinLocals);
+              $injector.invoke(require('plugins/kibana/_timepicker'), self, mixinLocals);
+
+              $scope.setupComplete = true;
+            });
         }
       };
     });
-  })
-  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup, Principal, AuthService) {
-    return {
-      template: require('text!plugins/kibana/kibana.html'),
-      controllerAs: 'kibana',
-      controller: function ($scope) {
-        var _ = require('lodash');
-        var self = $rootScope.kibana = this;
-        var notify = new Notifier({ location: 'Kibana' });
-        
-        $scope.authenticated = Principal.isAuthenticated();
-
-        $scope.logout = function(){
-          $scope.authenticated = false;
-          AuthService.logout();
-        };
-
-        $rootScope.$on('loggedIn', function(){
-          $scope.authenticated = Principal.isAuthenticated();
-        });
-
-        // this is the only way to handle uncaught route.resolve errors
-        $rootScope.$on('$routeChangeError', function (event, next, prev, err) {
-          notify.fatal(err);
-        });
-
-        // run init functions before loading the mixins, so that we can ensure that
-        // the environment is ready for them to get and use their dependencies
-        self.ready = Promise.all([ kbnSetup(), config.init() ])
-        .then(function () {
-          // load some "mixins"
-          var mixinLocals = { $scope: $scope, notify: notify };
-          $injector.invoke(require('plugins/kibana/_init'), self, mixinLocals);
-          $injector.invoke(require('plugins/kibana/_apps'), self, mixinLocals);
-          $injector.invoke(require('plugins/kibana/_timepicker'), self, mixinLocals);
-
-          $scope.setupComplete = true;
-        });
-      }
-    };
-  });
 });

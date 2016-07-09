@@ -4,6 +4,7 @@
 define(function (require) {
 
   var app = require('modules').get('kibana');
+  var angular = require('angular');
 
   app.factory('Principal', function Principal($q, $http) {
     var _identity,
@@ -27,7 +28,7 @@ define(function (require) {
 
         var rolesReachableInOneStep = rolesReachableInOneStepMap[higherRole];
 
-        if (rolesReachableInOneStep.indexOf(lowerRole) == -1) {
+        if (rolesReachableInOneStep.indexOf(lowerRole) === -1) {
           rolesReachableInOneStep.push(lowerRole);
         }
       }
@@ -43,7 +44,7 @@ define(function (require) {
         var visitedRoles = [];
         for (var iR = 0; iR < rolesToVisit.length; iR++) {
           var aRole = rolesToVisit[iR];
-          if (visitedRoles.indexOf(aRole) == -1) {
+          if (visitedRoles.indexOf(aRole) === -1) {
             visitedRoles.push(aRole);
           }
 
@@ -51,7 +52,7 @@ define(function (require) {
             var newReachableRoles = rolesReachableInOneStepMap[aRole];
 
             if (rolesToVisit.indexOf(role) !== -1 || visitedRoles.indexOf(role) !== -1) {
-              throw new Error("Cycle In Role Hierarchy");
+              throw new Error('Cycle In Role Hierarchy');
             }
             else {
               angular.forEach(newReachableRoles, function (item) {
@@ -86,7 +87,7 @@ define(function (require) {
         var reachableRoles = [];
         var self = this;
         angular.forEach(authorities, function (authority) {
-          if (reachableRoles.indexOf(authority) == -1) { //add granted user authorities to reachable ones
+          if (reachableRoles.indexOf(authority) === -1) { //add granted user authorities to reachable ones
             reachableRoles.push(authority);
           }
 
@@ -114,7 +115,7 @@ define(function (require) {
           return this.isInRole(_identity.setting.adminAuthority);
         }
         else {
-          return _identity.setting.adminAuthority == authority;
+          return _identity.setting.adminAuthority === authority;
         }
       },
 
@@ -167,10 +168,10 @@ define(function (require) {
         }
 
         // retrieve the identity data from the server, update the identity object, and then resolve.
-        $http.get("/api/users/search/current")
+        $http.get('/api/users/search/current')
           .then(function (account) {
             _identity = account.data;
-            _useHierarchy = _identity.setting && _identity.setting.useHierarchy && _identity.setting.useHierarchy == true;
+            _useHierarchy = _identity.setting && _identity.setting.useHierarchy && _identity.setting.useHierarchy === true;
             if (_useHierarchy) {
               buildRolesReachableInOnStep();
               buildRolesReachableInOneOrMoreStepsMap();

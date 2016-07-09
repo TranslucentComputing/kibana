@@ -18,19 +18,19 @@ define(function (require) {
   app.controller('LoginController', function (AuthService, Principal, $rootScope, TokenManager, $location) {
     var vm = this;
 
-    vm.init = function(){
-      if(Principal.isAuthenticated()){
-        $location.path("/discover");
+    vm.init = function () {
+      if (Principal.isAuthenticated()) {
+        $location.path('/discover');
       }
     };
 
     vm.credentials = {
-      username: "",
-      password: ""
+      username: '',
+      password: ''
     };
 
     vm.login = function () {
-      if(!!TokenManager.getToken()){
+      if (!!TokenManager.getToken()) {
         TokenManager.clearAll(); // if we have any token, let's clear it
       }
       AuthService.login(vm.credentials)
@@ -42,7 +42,6 @@ define(function (require) {
           });
         })
         .catch(function (err) {
-          alert('INVALID LOGIN');
           //TODO handle invalid login
         });
     };

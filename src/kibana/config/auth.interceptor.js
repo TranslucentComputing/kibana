@@ -8,11 +8,11 @@ define(function (require) {
   app.factory('AuthInterceptor', function ($q, $injector, TokenManager) {
     var authInterceptorServiceFactory = {};
 
-    var baseUri = "http://localhost:8080"; //TODO
+    var baseUri = 'http://localhost:8080'; //TODO
 
     var _request = function (config) {
       //update url for api calls
-      if(/^\/api\//.test(config.url)) {
+      if (/^\/api\//.test(config.url)) {
         config.url = baseUri + config.url;
       }
 
