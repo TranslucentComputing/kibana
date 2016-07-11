@@ -168,7 +168,7 @@ define(function (require) {
         }
 
         // retrieve the identity data from the server, update the identity object, and then resolve.
-        $http.get('/api/users/search/current')
+        $http.get('/api/users/search/current?projection=authorities')
           .then(function (account) {
             _identity = account.data;
             _useHierarchy = _identity.setting && _identity.setting.useHierarchy && _identity.setting.useHierarchy === true;

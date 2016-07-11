@@ -11,7 +11,8 @@ define(function (require, module, exports) {
     return {
       id: 'discover',
       name: 'Discover',
-      order: 0
+      order: 0,
+      role:'OP_KIBANA_DISCOVER'
     };
   });
 });

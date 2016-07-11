@@ -35,7 +35,8 @@ define(function (require, module, exports) {
     return {
       id: 'settings',
       name: 'Settings',
-      order: 3
+      order: 3,
+      role:'OP_KIBANA_SETTINGS'
     };
   });
 });

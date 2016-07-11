@@ -13,6 +13,11 @@ define(function (require) {
       template: require('text!plugins/login/index.html'),
       reloadOnSearch: false,
       resolve: {}
+    })
+    .when('/accessdenied', {
+      template: require('text!error/access_denied.html'),
+      reloadOnSearch: false,
+      resolve: {}
     });
 
   app.controller('LoginController', function (AuthService, Principal, $rootScope, TokenManager, $location) {

@@ -42,18 +42,26 @@ define(function (require) {
         $rootScope.$broadcast('loggedOut');
         Principal.authenticate(null);
 
-        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {
-          TokenManager.clearAll();
-          $location.path('/login');
-        });
+        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {});
+        TokenManager.clearAll();
+        $location.path('/login');
       },
       authorize: function (force) {
+        var vm = this;
         return Principal.identity(force)
           .then(function () {
             var isAuthenticated = Principal.isAuthenticated();
 
             if (!isAuthenticated) {
-              $location.path('/login');
+              vm.logout();
+            }else{
+              //If it's authenticated let's check the role required
+              if($rootScope.nextApp && $rootScope.nextApp.role){
+                if(!Principal.isInRole($rootScope.nextApp.role)){
+                  //If it's not in role, let's send to Access denied page
+                  $location.path('/accessdenied');
+                }
+              }
             }
 
           });

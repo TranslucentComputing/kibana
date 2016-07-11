@@ -14,7 +14,8 @@ define(function (require) {
     return {
       id: 'visualize',
       name: 'Visualize',
-      order: 1
+      order: 1,
+      role:'OP_KIBANA_VISUALIZE'
     };
   });
 });

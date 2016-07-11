@@ -1,5 +1,5 @@
 define(function (require) {
-  return function KbnControllerApps(Private, $rootScope, $scope, $location, globalState, sessionStorage) {
+  return function KbnControllerApps(Private, $rootScope, $scope, $location, globalState, sessionStorage, AuthService) {
     var _ = require('lodash');
 
     function appKey(app) {
@@ -26,7 +26,26 @@ define(function (require) {
     $scope.apps.forEach(assignPaths);
     $scope.apps.forEach(getShow);
 
+    /**
+     * Fired before the route change
+     * @param event
+     * @param next
+     * @param current
+     */
+    function beforeRouteChange(event, next, current) {
+      $rootScope.nextState = next;
+      var nextAppRoute = next.$$route.originalPath.split('/')[1];
+      $scope.apps.forEach(function (app) { //Find the app that belongs to the next route
+        if (app.id === nextAppRoute) {
+          $rootScope.nextApp = app;
+        }
+      });
+      AuthService.authorize(true); //let's force a rest call in every state change, so we can check the Auth.
+    }
 
+    /**
+     * Fired after the route change
+     */
     function onRouteChange() {
       var route = $location.path().split(/\//);
       $scope.apps.forEach(function (app) {
@@ -41,6 +60,7 @@ define(function (require) {
       setLastPath($rootScope.activeApp, globalState.removeFromUrl($location.url()));
     }
 
+    $rootScope.$on('$routeChangeStart', beforeRouteChange);
     $rootScope.$on('$routeChangeSuccess', onRouteChange);
     $rootScope.$on('$routeUpdate', onRouteChange);
   };

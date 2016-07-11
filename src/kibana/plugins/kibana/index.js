@@ -63,11 +63,22 @@ define(function (require) {
               $scope.authenticated = Principal.isAuthenticated();
             });
 
+          //TODO maybe performance can be improved
+          $scope.showTab = function (tab) {
+            return Principal.isAuthenticated() && Principal.isInRole(tab.role);
+          };
+
           $scope.logout = function () {
             $scope.authenticated = false;
             AuthService.logout();
           };
 
+          //TODO better way?
+          $rootScope.$on('loggedOut', function () {
+            $scope.authenticated = Principal.isAuthenticated();
+          });
+
+          //TODO better way?
           $rootScope.$on('loggedIn', function () {
             $scope.authenticated = Principal.isAuthenticated();
           });

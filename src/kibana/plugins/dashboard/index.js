@@ -211,7 +211,8 @@ define(function (require) {
     return {
       id: 'dashboard',
       name: 'Dashboard',
-      order: 2
+      order: 2,
+      role:'OP_KIBANA_DASHBOARD'
     };
   });
 });
