@@ -1,7 +1,5 @@
 # Kibana 4.1.9
 
-[![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
-
 Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
 ## Requirements
@@ -32,14 +30,3 @@ Now that you've configured an index pattern, you're ready to hop over to the [Di
 ## Documentation
 
 Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
-
-## Snapshot Builds
-
-For the daring, snapshot builds are available. These builds are created after each commit to the master branch, and therefore are not something you should run in production.
-
-| platform |  |  |
-| --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-windows.zip) |
