@@ -17,7 +17,7 @@ define(function (require) {
     return {
       login: function (credentials) {
         var data = 'username=' + credentials.username + '&password='
-          + credentials.password + '&grant_type=password&scope=read%20write&' +
+          + encodeURIComponent(credentials.password) + '&grant_type=password&scope=read%20write&' +
           'client_secret=KibanaAppSecret&client_id=KibanaApp';
 
         return $http.post(tokenUri, data, {
