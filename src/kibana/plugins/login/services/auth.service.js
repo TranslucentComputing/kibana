@@ -5,22 +5,15 @@ define(function (require) {
 
   var app = require('modules').get('kibana');
 
-  require('routes')
-    .when('/login', {
-      template: require('text!plugins/login/index.html'),
-      reloadOnSearch: false,
-      resolve: {}
-    });
+  app.factory('AuthService', function loginService($http, Base64, TokenManager, $rootScope, Principal, kbnUrl, Notifier, configFile) {
 
-  app.factory('AuthService', function loginService($http, Base64, TokenManager, $rootScope, Principal, $location) {
-    var tokenUri = 'http://localhost:8080/oauth/token'; //TODO update
     return {
       login: function (credentials) {
         var data = 'username=' + credentials.username + '&password='
           + credentials.password + '&grant_type=password&scope=read%20write&' +
           'client_secret=KibanaAppSecret&client_id=KibanaApp';
 
-        return $http.post(tokenUri, data, {
+        return $http.post(configFile.token_url, data, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
@@ -39,12 +32,18 @@ define(function (require) {
         // logout from the server
         var sessionKey = TokenManager.getSessionKey();
 
-        $rootScope.$broadcast('loggedOut');
         Principal.authenticate(null);
 
-        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {});
-        TokenManager.clearAll();
-        $location.path('/login');
+        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {
+          TokenManager.clearAll();
+          $rootScope.$broadcast('loggedOut');
+          kbnUrl.change('/login');
+        });
+      },
+      validToken: function () {
+        var token = TokenManager.getToken();
+
+        return TokenManager.hasValidToken(token);
       },
       authorize: function (force) {
         var vm = this;
@@ -53,17 +52,17 @@ define(function (require) {
             var isAuthenticated = Principal.isAuthenticated();
 
             if (!isAuthenticated) {
-              vm.logout();
-            }else{
+              kbnUrl.change('/login');
+            } else {
               //If it's authenticated let's check the role required
-              if($rootScope.nextApp && $rootScope.nextApp.role){
-                if(!Principal.isInRole($rootScope.nextApp.role)){
-                  //If it's not in role, let's send to Access denied page
-                  $location.path('/accessdenied');
+              if ($rootScope.nextApp && $rootScope.nextApp.role) {
+                if (!Principal.isInRole($rootScope.nextApp.role)) {
+                  kbnUrl.change('/' + $rootScope.currentApp.id);
+                  var notify = new Notifier();
+                  notify.error('You are not authorized to access the page.');
                 }
               }
             }
-
           });
       }
     };

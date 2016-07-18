@@ -8,7 +8,9 @@ router.get('/config', function (req, res, next) {
     'kibana_index',
     'default_app_id',
     'shard_timeout',
-    'xsrf_token'
+    'xsrf_token',
+    'token_url',
+    'api_url'
   ];
   var data = _.pick(config.kibana, keys);
   data.plugins = config.plugins;

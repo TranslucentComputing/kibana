@@ -2,7 +2,6 @@ define(function (require) {
   // base angular components/directives we expect to be loaded
   require('angular-bootstrap');
   require('services/private');
-  require('angular-local-storage');
   require('components/config/config');
   require('components/courier/courier');
   require('components/filter_bar/filter_bar');
@@ -26,14 +25,20 @@ define(function (require) {
   require('directives/pretty_duration');
   require('directives/rows');
 
-  require('config/auth.interceptor');
+  require('plugins/login/services/auth.interceptor');
+  require('plugins/login/services/auth.service');
+  require('plugins/login/services/principal.service');
+
   var Notifier = require('components/notify/_notifier');
 
   // ensure that the kibana module requires ui.bootstrap
   require('modules')
-    .get('kibana', ['ui.bootstrap', 'LocalStorageModule'])
+    .get('kibana', ['ui.bootstrap'])
     .config(function ($tooltipProvider, $httpProvider, configFile) {
       $tooltipProvider.setTriggers({'mouseenter': 'mouseleave click'});
+
+      $httpProvider.interceptors.push('AuthInterceptor');
+
       $httpProvider.interceptors.push(function () {
         return {
           request: function (opts) {
@@ -58,29 +63,32 @@ define(function (require) {
           var self = $rootScope.kibana = this;
           var notify = new Notifier({location: 'Kibana'});
 
-          Principal.identity()
-            .then(function () {
-              $scope.authenticated = Principal.isAuthenticated();
-            });
+          //used when the application is reloaded
+          if (!Principal.isIdentityResolved() && AuthService.validToken()) {//identity not set and valid token found
+            Principal.identity(true). //retrieve the current data
+              then(function (account) {
+                $scope.authenticated = Principal.isAuthenticated(); //set authenticated flag
+              });
+          }
 
-          //TODO maybe performance can be improved
-          $scope.showTab = function (tab) {
-            return Principal.isAuthenticated() && Principal.isInRole(tab.role);
+          //Check app access
+          $scope.showTab = function (app) {
+            return Principal.isInRole(app.role);
           };
 
+          //Log out
           $scope.logout = function () {
-            $scope.authenticated = false;
             AuthService.logout();
           };
 
-          //TODO better way?
+          //Respond to log out event
           $rootScope.$on('loggedOut', function () {
-            $scope.authenticated = Principal.isAuthenticated();
+            $scope.authenticated = false;
           });
 
-          //TODO better way?
+          //Respond to log in event
           $rootScope.$on('loggedIn', function () {
-            $scope.authenticated = Principal.isAuthenticated();
+            $scope.authenticated = Principal.isAuthenticated(); //set authenticated flag
           });
 
           // this is the only way to handle uncaught route.resolve errors
@@ -97,7 +105,6 @@ define(function (require) {
               $injector.invoke(require('plugins/kibana/_init'), self, mixinLocals);
               $injector.invoke(require('plugins/kibana/_apps'), self, mixinLocals);
               $injector.invoke(require('plugins/kibana/_timepicker'), self, mixinLocals);
-
               $scope.setupComplete = true;
             });
         }

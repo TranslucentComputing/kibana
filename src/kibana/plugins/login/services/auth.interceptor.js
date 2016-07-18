@@ -5,15 +5,13 @@ define(function (require) {
 
   var app = require('modules').get('kibana');
 
-  app.factory('AuthInterceptor', function ($q, $injector, TokenManager) {
+  app.factory('AuthInterceptor', function ($q, $injector, TokenManager, configFile) {
     var authInterceptorServiceFactory = {};
-
-    var baseUri = 'http://localhost:8080'; //TODO
 
     var _request = function (config) {
       //update url for api calls
       if (/^\/api\//.test(config.url)) {
-        config.url = baseUri + config.url;
+        config.url = configFile.api_url + config.url;
       }
 
       config.headers = config.headers || {};
@@ -28,8 +26,9 @@ define(function (require) {
 
     var _responseError = function (response) {
       // token has expired
-      if (response.status === 401 && (response.data.error.toLowerCase() == 'invalid_token' || response.data.error.toLowerCase() == 'unauthorized')) {
-        if (response.data.error == 'invalid_token') {
+      if (response.status === 401 && (response.data.error.toLowerCase() === 'invalid_token'
+        || response.data.error.toLowerCase() === 'unauthorized')) {
+        if (response.data.error === 'invalid_token') {
           TokenManager.removeToken();
         }
         var Principal = $injector.get('Principal');

@@ -5,22 +5,22 @@ define(function (require) {
 
   var app = require('modules').get('kibana');
 
-  app.factory('TokenManager', function loginService(localStorageService) {
+  app.factory('TokenManager', function loginService(sessionStorage) {
     return {
       setToken: function (token) {
-        localStorageService.set('token', token);
+        sessionStorage.set('token', token);
       },
       removeToken: function () {
-        localStorageService.remove('token');
+        sessionStorage.remove('token');
       },
       getToken: function () {
-        return localStorageService.get('token');
+        return sessionStorage.get('token');
       },
       hasValidToken: function (token) {
         return token && token.expires_at && token.expires_at > new Date().getTime();
       },
       clearAll: function () {
-        localStorageService.clearAll();
+        sessionStorage.clear();
       },
       getSessionKey: function () {
         var token = this.getToken();
@@ -31,7 +31,7 @@ define(function (require) {
           return null;
         }
       }
-    }
+    };
   });
 
 });

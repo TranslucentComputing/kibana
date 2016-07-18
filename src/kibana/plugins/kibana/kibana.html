@@ -17,15 +17,20 @@
     <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
       <ul class="nav navbar-nav" role="navigation">
         <li aria-label="Kibana Barcode Logo" class="logo hidden-xs"></li>
-        <li ng-show="showTab(app)" ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}">
-          <a ng-href="#{{(app === activeApp || app.lastPath.indexOf('login') > -1 || app.lastPath.indexOf('accessdenied') > -1) ? app.rootPath : app.lastPath}}" bo-text="app.name"></a>
+        <li ng-repeat="app in apps.inOrder | filter:{show: true}" ng-class="{active: activeApp === app}"
+            ng-show="showTab(app)">
+          <a ng-href="#{{app === activeApp ? app.rootPath : app.lastPath}}" bo-text="app.name"></a>
         </li>
-        <li ng-show="authenticated">
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right" ng-show="authenticated">
+        <li>
           <a ng-click="logout()">Logout</a>
         </li>
       </ul>
 
-      <ul ng-if="setupComplete" ng-show="authenticated && timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+      <ul ng-if="setupComplete" ng-show="authenticated && timefilter.enabled"
+          class="nav navbar-nav navbar-right navbar-timepicker">
         <li>
           <a ng-click="toggleRefresh()"
              ng-show="timefilter.refreshInterval.value > 0">
@@ -52,7 +57,7 @@
         </li>
       </ul>
 
-      <ul class="nav navbar-nav navbar-right navbar-timepicker">
+      <ul class="nav navbar-nav navbar-right navbar-timepicker" ng-show="authenticated">
         <li ng-show="httpActive.length" class="navbar-text hidden-xs">
           <div class="spinner"></div>
         </li>
@@ -62,7 +67,7 @@
   </nav>
 
   <config
-    ng-show="authenticated && timefilter.enabled"
+    ng-show="timefilter.enabled"
     config-template="globalConfigTemplate"
     config-object="timefilter"
     config-close="toggleTimepicker">

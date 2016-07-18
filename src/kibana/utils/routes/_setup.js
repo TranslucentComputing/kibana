@@ -1,5 +1,5 @@
 define(function (require) {
-  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope) {
+  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope, Principal) {
     var _ = require('lodash');
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
@@ -18,42 +18,50 @@ define(function (require) {
           courier.SearchSource.ready,
           $rootScope.kibana && $rootScope.kibana.ready
         ])
-        .then(function () {
-          var path = $route.current.$$route.originalPath;
-          var defaultIndexRequired = !path.match(allowedRoutesRE);
+          .then(function () {
+            var path = $route.current.$$route.originalPath;
+            var defaultIndexRequired = !path.match(allowedRoutesRE);
 
-          return courier.indexPatterns.getIds()
-          .then(function (patterns) {
-            var defined = !!config.get('defaultIndex');
-            var exists = _.contains(patterns, config.get('defaultIndex'));
+            return courier.indexPatterns.getIds()
+              .then(function (patterns) {
+                var defined = !!config.get('defaultIndex');
+                var exists = _.contains(patterns, config.get('defaultIndex'));
 
-            if (defined && !exists) {
-              config.clear('defaultIndex');
-              defined = false;
-            }
+                if (defined && !exists) {
+                  config.clear('defaultIndex');
+                  defined = false;
+                }
 
-            if (!defined) {
-              if (defaultIndexRequired) {
-                throw new NoDefaultIndexPattern();
-              } else {
-                firstNoDefaultError = false;
-              }
-            }
+                if (!defined) {
+                  if (defaultIndexRequired) {
+                    throw new NoDefaultIndexPattern();
+                  } else {
+                    firstNoDefaultError = false;
+                  }
+                }
 
-            return rootSearchSource.loadDefault();
+                return rootSearchSource.loadDefault();
+              });
           });
-        });
       },
       handleKnownError: function (err) {
         if (err instanceof NoDefaultIndexPattern || err instanceof NoDefinedIndexPatterns) {
           // .change short circuits the routes by calling $route.refresh(). We can safely swallow this error
           // after reporting it to the user
-          kbnUrl.change('/settings/indices');
+
+          var showError = true;
+          if (Principal.isIdentityResolved()) { //Even if there are no indices define if the user is not logged in redirect to login page
+            kbnUrl.change('/settings/indices');
+          }
+          else {
+            showError = false;
+            kbnUrl.change('/login');
+          }
 
           if (err instanceof NoDefaultIndexPattern) {
             if (firstNoDefaultError) {
               firstNoDefaultError = false;
-            } else {
+            } else if (showError) {
               notify.error(err);
             }
           }

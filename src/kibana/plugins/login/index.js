@@ -1,31 +1,26 @@
 define(function (require) {
 
-  var _ = require('lodash');
   var angular = require('angular');
 
-  var app = require('modules').get('kibana');
-
-  require('plugins/login/services/auth.service');
-  require('plugins/login/services/principal.service');
+  var app = require('modules').get('app/login', [
+    'ngRoute',
+    'kibana/config'
+  ]);
 
   require('routes')
     .when('/login', {
       template: require('text!plugins/login/index.html'),
-      reloadOnSearch: false,
-      resolve: {}
-    })
-    .when('/accessdenied', {
-      template: require('text!error/access_denied.html'),
-      reloadOnSearch: false,
-      resolve: {}
+      reloadOnSearch: true
     });
 
-  app.controller('LoginController', function (AuthService, Principal, $rootScope, TokenManager, $location) {
+  app.controller('login', function ($rootScope, $scope, configFile, AuthService, Principal, TokenManager, Notifier, kbnUrl) {
     var vm = this;
+
+    var notify = new Notifier();
 
     vm.init = function () {
       if (Principal.isAuthenticated()) {
-        $location.path('/discover');
+        kbnUrl.change('/' + configFile.default_app_id, {});
       }
     };
 
@@ -41,17 +36,36 @@ define(function (require) {
       AuthService.login(vm.credentials)
         .then(function (data) {
           // retrieve the logged account information
-          Principal.identity(true).then(function (account) {
-            $rootScope.$broadcast('loggedIn');
-            $location.path('/discover');
-          });
+          Principal.identity(true)
+            .then(function (account) {
+              $rootScope.$broadcast('loggedIn');
+              $scope.$emit('application.load');
+              kbnUrl.change('/' + configFile.default_app_id, {});
+            });
         })
         .catch(function (err) {
-          //TODO handle invalid login
+          if (err.status === 400 && err.data.error
+            && err.data.error === 'invalid_grant' && err.data.error_description.indexOf('locked') > -1) {
+            notify.error('User account is locked. Contact an administrator to unlock your account or reset your password.');
+          } else if (err.status === 401) {
+            notify.error(err.data.error_description);
+          }
+          else {
+            notify.error('Authentication failed! Please check your credentials and try again.');
+          }
         });
     };
 
     vm.init();
+  });
+
+  var apps = require('registry/apps');
+  apps.register(function LoginAppModule() {
+    return {
+      id: 'login',
+      name: 'Login',
+      order: -3
+    };
   });
 
 });

@@ -27,42 +27,48 @@ define(function (require) {
   ]);
 
   require('routes')
-  .when('/discover/:id?', {
-    template: require('text!plugins/discover/index.html'),
-    reloadOnSearch: false,
-    resolve: {
-      ip: function (Promise, courier, config, $location) {
-        return courier.indexPatterns.getIds()
-        .then(function (list) {
-          var stateRison = $location.search()._a;
-          var state;
-          try { state = rison.decode(stateRison); } catch (e) {}
-          state = state || {};
+    .when('/discover/:id?', {
+      template: require('text!plugins/discover/index.html'),
+      reloadOnSearch: false,
+      resolve: {
+        authorize: function (AuthService) {
+          return AuthService.authorize();
+        },
+        ip: function (Promise, courier, config, $location) {
+          return courier.indexPatterns.getIds()
+            .then(function (list) {
+              var stateRison = $location.search()._a;
+              var state;
+              try {
+                state = rison.decode(stateRison);
+              } catch (e) {
+              }
+              state = state || {};
 
-          var specified = !!state.index;
-          var exists = _.contains(list, state.index);
-          var id = exists ? state.index : config.get('defaultIndex');
+              var specified = !!state.index;
+              var exists = _.contains(list, state.index);
+              var id = exists ? state.index : config.get('defaultIndex');
 
-          return Promise.props({
-            list: list,
-            loaded: courier.indexPatterns.get(id),
-            stateVal: state.index,
-            stateValFound: specified && exists
-          });
-        });
-      },
-      savedSearch: function (courier, savedSearches, $route) {
-        return savedSearches.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'search': '/discover',
-          'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
-        }));
+              return Promise.props({
+                list: list,
+                loaded: courier.indexPatterns.get(id),
+                stateVal: state.index,
+                stateValFound: specified && exists
+              });
+            });
+        },
+        savedSearch: function (courier, savedSearches, $route) {
+          return savedSearches.get($route.current.params.id)
+            .catch(courier.redirectWhenMissing({
+              'search': '/discover',
+              'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
+            }));
+        }
       }
-    }
-  });
+    });
 
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
-    AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
+                                       AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
@@ -108,6 +114,7 @@ define(function (require) {
     }
 
     var $state = $scope.state = new AppState(getStateDefaults());
+
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
@@ -147,139 +154,139 @@ define(function (require) {
       };
 
       $scope.updateDataSource()
-      .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
-          $scope.fetch();
-        });
-
-        $scope.$watchCollection('state.sort', function (sort) {
-          if (!sort) return;
-
-          // get the current sort from {key: val} to ["key", "val"];
-          var currentSort = _.pairs($scope.searchSource.get('sort')).pop();
-
-          // if the searchSource doesn't know, tell it so
-          if (!angular.equals(sort, currentSort)) $scope.fetch();
-        });
-
-        // update data source when filters update
-        $scope.$listen(queryFilter, 'update', function () {
-          return $scope.updateDataSource().then(function () {
-            $state.save();
+        .then(function () {
+          $scope.$listen(timefilter, 'fetch', function () {
+            $scope.fetch();
           });
-        });
 
-        // update data source when hitting forward/back and the query changes
-        $scope.$listen($state, 'fetch_with_changes', function (diff) {
-          if (diff.indexOf('query') >= 0) $scope.fetch();
-        });
+          $scope.$watchCollection('state.sort', function (sort) {
+            if (!sort) return;
 
-        // fetch data when filters fire fetch event
-        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+            // get the current sort from {key: val} to ["key", "val"];
+            var currentSort = _.pairs($scope.searchSource.get('sort')).pop();
 
-        $scope.$watch('opts.timefield', function (timefield) {
-          timefilter.enabled = !!timefield;
-        });
+            // if the searchSource doesn't know, tell it so
+            if (!angular.equals(sort, currentSort)) $scope.fetch();
+          });
 
-        $scope.$watch('state.interval', function (interval, oldInterval) {
-          if (interval !== oldInterval && interval === 'auto') {
-            $scope.showInterval = false;
-          }
-          $scope.fetch();
-        });
+          // update data source when filters update
+          $scope.$listen(queryFilter, 'update', function () {
+            return $scope.updateDataSource().then(function () {
+              $state.save();
+            });
+          });
 
-        $scope.$watch('vis.aggs', function () {
-          // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield) return;
+          // update data source when hitting forward/back and the query changes
+          $scope.$listen($state, 'fetch_with_changes', function (diff) {
+            if (diff.indexOf('query') >= 0) $scope.fetch();
+          });
 
-          var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+          // fetch data when filters fire fetch event
+          $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
-          if (buckets && buckets.length === 1) {
-            $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
-          } else {
-            $scope.intervalName = 'auto';
-          }
-        });
+          $scope.$watch('opts.timefield', function (timefield) {
+            timefilter.enabled = !!timefield;
+          });
 
-        $scope.$watchMulti([
-          'rows',
-          'fetchStatus'
-        ], (function updateResultState() {
-          var prev = {};
-          var status = {
-            LOADING: 'loading', // initial data load
-            READY: 'ready', // results came back
-            NO_RESULTS: 'none' // no results came back
-          };
+          $scope.$watch('state.interval', function (interval, oldInterval) {
+            if (interval !== oldInterval && interval === 'auto') {
+              $scope.showInterval = false;
+            }
+            $scope.fetch();
+          });
 
-          function pick(rows, oldRows, fetchStatus) {
-            // initial state, pretend we are loading
-            if (rows == null && oldRows == null) return status.LOADING;
+          $scope.$watch('vis.aggs', function () {
+            // no timefield, no vis, nothing to update
+            if (!$scope.opts.timefield) return;
 
-            var rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus) return status.LOADING;
-            else if (!rowsEmpty) return status.READY;
-            else return status.NO_RESULTS;
-          }
+            var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
-          return function () {
-            var current = {
-              rows: $scope.rows,
-              fetchStatus: $scope.fetchStatus
+            if (buckets && buckets.length === 1) {
+              $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
+            } else {
+              $scope.intervalName = 'auto';
+            }
+          });
+
+          $scope.$watchMulti([
+            'rows',
+            'fetchStatus'
+          ], (function updateResultState() {
+            var prev = {};
+            var status = {
+              LOADING: 'loading', // initial data load
+              READY: 'ready', // results came back
+              NO_RESULTS: 'none' // no results came back
             };
 
-            $scope.resultState = pick(
-              current.rows,
-              prev.rows,
-              current.fetchStatus,
-              prev.fetchStatus
-            );
+            function pick(rows, oldRows, fetchStatus) {
+              // initial state, pretend we are loading
+              if (rows == null && oldRows == null) return status.LOADING;
 
-            prev = current;
-          };
-        }()));
+              var rowsEmpty = _.isEmpty(rows);
+              if (rowsEmpty && fetchStatus) return status.LOADING;
+              else if (!rowsEmpty) return status.READY;
+              else return status.NO_RESULTS;
+            }
 
-        $scope.searchSource.onError(function (err) {
-          console.log(err);
-          notify.error('An error occurred with your request. Reset your inputs and try again.');
-        }).catch(notify.fatal);
+            return function () {
+              var current = {
+                rows: $scope.rows,
+                fetchStatus: $scope.fetchStatus
+              };
 
-        function initForTime() {
-          return setupVisualization().then($scope.updateTime);
-        }
+              $scope.resultState = pick(
+                current.rows,
+                prev.rows,
+                current.fetchStatus,
+                prev.fetchStatus
+              );
 
-        return Promise.resolve($scope.opts.timefield && initForTime())
-        .then(function () {
-          init.complete = true;
-          $state.replace();
-          $scope.$emit('application.load');
+              prev = current;
+            };
+          }()));
+
+          $scope.searchSource.onError(function (err) {
+            console.log(err);
+            notify.error('An error occurred with your request. Reset your inputs and try again.');
+          }).catch(notify.fatal);
+
+          function initForTime() {
+            return setupVisualization().then($scope.updateTime);
+          }
+
+          return Promise.resolve($scope.opts.timefield && initForTime())
+            .then(function () {
+              init.complete = true;
+              $state.replace();
+              $scope.$emit('application.load');
+            });
         });
-      });
     });
 
     $scope.opts.saveDataSource = function () {
       return $scope.updateDataSource()
-      .then(function () {
-        savedSearch.id = savedSearch.title;
-        savedSearch.columns = $scope.state.columns;
-        savedSearch.sort = $scope.state.sort;
+        .then(function () {
+          savedSearch.id = savedSearch.title;
+          savedSearch.columns = $scope.state.columns;
+          savedSearch.sort = $scope.state.sort;
 
-        return savedSearch.save()
-        .then(function (id) {
-          $scope.configTemplate.close('save');
+          return savedSearch.save()
+            .then(function (id) {
+              $scope.configTemplate.close('save');
 
-          if (id) {
-            notify.info('Saved Data Source "' + savedSearch.title + '"');
-            if (savedSearch.id !== $route.current.params.id) {
-              kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
-            } else {
-              // Update defaults so that "reload saved query" functions correctly
-              $state.setDefaults(getStateDefaults());
-            }
-          }
-        });
-      })
-      .catch(notify.error);
+              if (id) {
+                notify.info('Saved Data Source "' + savedSearch.title + '"');
+                if (savedSearch.id !== $route.current.params.id) {
+                  kbnUrl.change('/discover/{{id}}', {id: savedSearch.id});
+                } else {
+                  // Update defaults so that "reload saved query" functions correctly
+                  $state.setDefaults(getStateDefaults());
+                }
+              }
+            });
+        })
+        .catch(notify.error);
     };
 
     $scope.opts.fetch = $scope.fetch = function () {
@@ -289,12 +296,12 @@ define(function (require) {
       $scope.updateTime();
 
       $scope.updateDataSource()
-      .then(setupVisualization)
-      .then(function () {
-        $state.save();
-        return courier.fetch();
-      })
-      .catch(notify.error);
+        .then(setupVisualization)
+        .then(function () {
+          $state.save();
+          return courier.fetch();
+        })
+        .catch(notify.error);
     };
 
     $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
@@ -413,7 +420,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
+      kbnUrl.change('/discover/{{id}}', {id: $route.current.params.id});
     };
 
     $scope.newQuery = function () {
@@ -422,16 +429,16 @@ define(function (require) {
 
     $scope.updateDataSource = Promise.method(function () {
       $scope.searchSource
-      .size($scope.opts.sampleSize)
-      .sort(getSort($state.sort, $scope.indexPattern))
-      .query(!$state.query ? null : $state.query)
-      .highlight({
-        pre_tags: [highlightTags.pre],
-        post_tags: [highlightTags.post],
-        fields: {'*': {}},
-        fragment_size: 2147483647 // Limit of an integer.
-      })
-      .set('filter', queryFilter.getFilters());
+        .size($scope.opts.sampleSize)
+        .sort(getSort($state.sort, $scope.indexPattern))
+        .query(!$state.query ? null : $state.query)
+        .highlight({
+          pre_tags: [highlightTags.pre],
+          post_tags: [highlightTags.post],
+          fields: {'*': {}},
+          fragment_size: 2147483647 // Limit of an integer.
+        })
+        .set('filter', queryFilter.getFilters());
     });
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -504,10 +511,10 @@ define(function (require) {
           resolve($scope.vis);
         });
       })
-      .finally(function () {
-        // clear the loading flag
-        loadingVis = null;
-      });
+        .finally(function () {
+          // clear the loading flag
+          loadingVis = null;
+        });
 
       return loadingVis;
     };

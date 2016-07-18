@@ -2,16 +2,21 @@ define(function (require) {
   var _ = require('lodash');
 
   require('routes')
-  .when('/settings/about', {
-    template: require('text!plugins/settings/sections/about/index.html')
-  });
+    .when('/settings/about', {
+      template: require('text!plugins/settings/sections/about/index.html'),
+      resolve: {
+        authorize: function (AuthService) {
+          return AuthService.authorize();
+        }
+      }
+    });
 
   require('modules').get('apps/settings')
-  .controller('settingsAbout', function ($scope, kbnVersion, buildNum, commitSha) {
-    $scope.kbnVersion = kbnVersion;
-    $scope.buildNum = buildNum;
-    $scope.commitSha = commitSha;
-  });
+    .controller('settingsAbout', function ($scope, kbnVersion, buildNum, commitSha) {
+      $scope.kbnVersion = kbnVersion;
+      $scope.buildNum = buildNum;
+      $scope.commitSha = commitSha;
+    });
 
   return {
     order: Infinity,

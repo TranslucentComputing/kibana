@@ -27,25 +27,31 @@ define(function (require) {
   ]);
 
   require('routes')
-  .when('/dashboard', {
-    template: require('text!plugins/dashboard/index.html'),
-    resolve: {
-      dash: function (savedDashboards) {
-        return savedDashboards.get();
+    .when('/dashboard', {
+      template: require('text!plugins/dashboard/index.html'),
+      resolve: {
+        authorize: function (AuthService) {
+          return AuthService.authorize();
+        },
+        dash: function (savedDashboards) {
+          return savedDashboards.get();
+        }
       }
-    }
-  })
-  .when('/dashboard/:id', {
-    template: require('text!plugins/dashboard/index.html'),
-    resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier) {
-        return savedDashboards.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'dashboard' : '/dashboard'
-        }));
+    })
+    .when('/dashboard/:id', {
+      template: require('text!plugins/dashboard/index.html'),
+      resolve: {
+        authorize: function (AuthService) {
+          return AuthService.authorize();
+        },
+        dash: function (savedDashboards, Notifier, $route, $location, courier) {
+          return savedDashboards.get($route.current.params.id)
+            .catch(courier.redirectWhenMissing({
+              'dashboard': '/dashboard'
+            }));
+        }
       }
-    }
-  });
+    });
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
@@ -147,16 +153,16 @@ define(function (require) {
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
 
           dash.save()
-          .then(function (id) {
-            $scope.configTemplate.close('save');
-            if (id) {
-              notify.info('Saved Dashboard as "' + dash.title + '"');
-              if (dash.id !== $routeParams.id) {
-                kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+            .then(function (id) {
+              $scope.configTemplate.close('save');
+              if (id) {
+                notify.info('Saved Dashboard as "' + dash.title + '"');
+                if (dash.id !== $routeParams.id) {
+                  kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+                }
               }
-            }
-          })
-          .catch(notify.fatal);
+            })
+            .catch(notify.fatal);
         };
 
         var pendingVis = _.size($state.panels);
@@ -177,12 +183,12 @@ define(function (require) {
         // called by the saved-object-finder when a user clicks a vis
         $scope.addVis = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'visualization' });
+          $state.panels.push({id: hit.id, type: 'visualization'});
         };
 
         $scope.addSearch = function (hit) {
           pendingVis++;
-          $state.panels.push({ id: hit.id, type: 'search' });
+          $state.panels.push({id: hit.id, type: 'search'});
         };
 
         // Setup configurable values for config directive, after objects are initialized
@@ -196,7 +202,7 @@ define(function (require) {
               link: $location.absUrl(),
               // This sucks, but seems like the cleanest way. Uhg.
               embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-                '" height="600" width="800"></iframe>'
+              '" height="600" width="800"></iframe>'
             };
           }
         };
@@ -212,7 +218,7 @@ define(function (require) {
       id: 'dashboard',
       name: 'Dashboard',
       order: 2,
-      role:'OP_KIBANA_DASHBOARD'
+      role: 'OP_KIBANA_DASHBOARD'
     };
   });
 });

@@ -12,9 +12,6 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
-  //Add our login component
-  require('plugins/login/index');
-
   var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
@@ -42,9 +39,6 @@ define(function (require) {
     .constant('sessionId', Date.now())
     // attach the route manager's known routes
     .config(routes.config)
-    .config(function($httpProvider){
-      $httpProvider.interceptors.push('AuthInterceptor');
-    })
     .config(['ngClipProvider', function (ngClipProvider) {
       ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
     }]);

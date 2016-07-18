@@ -61,7 +61,9 @@ var config = module.exports = {
   maxSockets              : kibana.maxSockets,
   log_file                : kibana.log_file,
   request_timeout         : kibana.request_timeout,
-  ping_timeout            : kibana.ping_timeout
+  ping_timeout            : kibana.ping_timeout,
+  token_url               : kibana.token_url,
+  api_url                 : kibana.api_url
 };
 
 config.plugins = listPlugins(config);

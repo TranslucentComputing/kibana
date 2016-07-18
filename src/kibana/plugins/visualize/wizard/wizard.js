@@ -13,10 +13,15 @@ define(function (require) {
   var routes = require('routes');
 
   /********
-  /** Wizard Step 1
-  /********/
+   /** Wizard Step 1
+   /********/
   routes.when('/visualize/step/1', {
-    template: templateStep(1, require('text!plugins/visualize/wizard/step_1.html'))
+    template: templateStep(1, require('text!plugins/visualize/wizard/step_1.html')),
+    resolve: {
+      authorize: function (AuthService) {
+        return AuthService.authorize();
+      }
+    }
   });
 
   module.controller('VisualizeWizardStep1', function ($scope, $route, $location, timefilter, Private) {
@@ -30,11 +35,14 @@ define(function (require) {
   });
 
   /********
-  /** Wizard Step 2
-  /********/
+   /** Wizard Step 2
+   /********/
   routes.when('/visualize/step/2', {
     template: templateStep(2, require('text!plugins/visualize/wizard/step_2.html')),
     resolve: {
+      authorize: function (AuthService) {
+        return AuthService.authorize();
+      },
       indexPatternIds: function (courier) {
         return courier.indexPatterns.getIds();
       }

@@ -5,30 +5,35 @@ define(function (require, module, exports) {
   require('filters/start_from');
 
   require('routes')
-  .when('/settings', {
-    redirectTo: '/settings/indices'
-  });
+    .when('/settings', {
+      redirectTo: '/settings/indices',
+      resolve: {
+        authorize: function (AuthService) {
+          return AuthService.authorize();
+        }
+      }
+    });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsApp', function (Private, $route, timefilter) {
-    return {
-      restrict: 'E',
-      template: require('text!plugins/settings/app.html'),
-      transclude: true,
-      scope: {
-        sectionName: '@section'
-      },
-      link: function ($scope, $el) {
-        timefilter.enabled = false;
-        $scope.sections = require('plugins/settings/sections/index');
-        $scope.section = _.find($scope.sections, { name: $scope.sectionName });
+    .directive('kbnSettingsApp', function (Private, $route, timefilter) {
+      return {
+        restrict: 'E',
+        template: require('text!plugins/settings/app.html'),
+        transclude: true,
+        scope: {
+          sectionName: '@section'
+        },
+        link: function ($scope, $el) {
+          timefilter.enabled = false;
+          $scope.sections = require('plugins/settings/sections/index');
+          $scope.section = _.find($scope.sections, {name: $scope.sectionName});
 
-        $scope.sections.forEach(function (section) {
-          section.class = (section === $scope.section) ? 'active' : void 0;
-        });
-      }
-    };
-  });
+          $scope.sections.forEach(function (section) {
+            section.class = (section === $scope.section) ? 'active' : void 0;
+          });
+        }
+      };
+    });
 
   var apps = require('registry/apps');
   apps.register(function SettingsAppModule() {
@@ -36,7 +41,7 @@ define(function (require, module, exports) {
       id: 'settings',
       name: 'Settings',
       order: 3,
-      role:'OP_KIBANA_SETTINGS'
+      role: 'OP_KIBANA_SETTINGS'
     };
   });
 });
