@@ -10,7 +10,7 @@ define(function (require) {
   require('routes')
     .when('/login', {
       template: require('text!plugins/login/index.html'),
-      reloadOnSearch: true
+      reloadOnSearch: false
     });
 
   app.controller('login', function ($rootScope, $scope, configFile, AuthService, Principal, TokenManager, Notifier, kbnUrl) {
@@ -39,8 +39,7 @@ define(function (require) {
           Principal.identity(true)
             .then(function (account) {
               $rootScope.$broadcast('loggedIn');
-              $scope.$emit('application.load');
-              kbnUrl.change('/' + configFile.default_app_id, {});
+              kbnUrl.redirect('/discover');
             });
         })
         .catch(function (err) {

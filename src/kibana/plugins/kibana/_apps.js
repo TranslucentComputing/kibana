@@ -34,13 +34,19 @@ define(function (require) {
      */
     function beforeRouteChange(event, next, current) {
       $rootScope.nextState = next;
-      var nextAppRoute = next.$$route.originalPath.split('/')[1];
-      var currentAppRoute = current.$$route.originalPath.split('/')[1];
+      var nextAppRoute = null;
+      if (next && next.$$route) {
+        nextAppRoute = next.$$route.originalPath.split('/')[1];
+      }
+      var currentAppRoute = null;
+      if (current && current.$$route) {
+        currentAppRoute = current.$$route.originalPath.split('/')[1];
+      }
       $scope.apps.forEach(function (app) { //Find the app that belongs to the next route
-        if (app.id === nextAppRoute) {
+        if (nextAppRoute && app.id === nextAppRoute) {
           $rootScope.nextApp = app;
         }
-        else if (app.id === currentAppRoute) {
+        else if (currentAppRoute && app.id === currentAppRoute) {
           $rootScope.currentApp = app;
         }
       });
