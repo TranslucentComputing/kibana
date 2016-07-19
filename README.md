@@ -7,6 +7,19 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 - Elasticsearch version 1.4.4 or later
 - Kibana binary package
 
+## Build
+Run grunt to build release version
+
+```grunt release```
+
+Build docker image
+
+```docker build -t gcr.io/tcinc-dev/kibana:4.1.9-auth .```
+
+Upload to repo
+
+```gcloud docker push gcr.io/tcinc-dev/kibana:4.1.9-auth```
+
 ## Installation
 
 * Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
