@@ -1,15 +1,12 @@
-/**
- * Created by Daniel Costa <daniel@translucentcomputing.com> on 7/8/2016.
- */
 define(function (require) {
 
   var app = require('modules').get('kibana');
   var angular = require('angular');
 
   app.factory('Principal', function Principal($q, $http) {
-    var _identity,
-      _authenticated = false,
-      _useHierarchy = false;
+    var _identity;
+    var _authenticated = false;
+    var _useHierarchy = false;
 
     var patternHierarchy = /\s*([^\\s>]+)\s*>\s*([^\s>]+)/g;
     var rolesReachableInOneStepMap = {};
@@ -34,35 +31,41 @@ define(function (require) {
       }
     }
 
+    function updateRolesToVisit(rolesToVisit, newReachableRoles) {
+      angular.forEach(newReachableRoles, function (item) {
+        rolesToVisit.push(item);
+      });
+    }
+
     function buildRolesReachableInOneOrMoreStepsMap() {
       for (var role in rolesReachableInOneStepMap) {
-        var rolesToVisit = [];
         if (rolesReachableInOneStepMap.hasOwnProperty(role)) {
-          rolesToVisit = angular.copy(rolesReachableInOneStepMap[role]);
-        }
-
-        var visitedRoles = [];
-        for (var iR = 0; iR < rolesToVisit.length; iR++) {
-          var aRole = rolesToVisit[iR];
-          if (visitedRoles.indexOf(aRole) === -1) {
-            visitedRoles.push(aRole);
+          var rolesToVisit = [];
+          if (rolesReachableInOneStepMap.hasOwnProperty(role)) {
+            rolesToVisit = angular.copy(rolesReachableInOneStepMap[role]);
           }
 
-          if (rolesReachableInOneStepMap.hasOwnProperty(aRole)) {
-            var newReachableRoles = rolesReachableInOneStepMap[aRole];
-
-            if (rolesToVisit.indexOf(role) !== -1 || visitedRoles.indexOf(role) !== -1) {
-              throw new Error('Cycle In Role Hierarchy');
+          var visitedRoles = [];
+          for (var iR = 0; iR < rolesToVisit.length; iR++) {
+            var aRole = rolesToVisit[iR];
+            if (visitedRoles.indexOf(aRole) === -1) {
+              visitedRoles.push(aRole);
             }
-            else {
-              angular.forEach(newReachableRoles, function (item) {
-                rolesToVisit.push(item);
-              });
+
+            if (rolesReachableInOneStepMap.hasOwnProperty(aRole)) {
+              var newReachableRoles = rolesReachableInOneStepMap[aRole];
+
+              if (rolesToVisit.indexOf(role) !== -1 || visitedRoles.indexOf(role) !== -1) {
+                throw new Error('Cycle In Role Hierarchy');
+              }
+              else {
+                updateRolesToVisit(rolesToVisit, newReachableRoles);
+              }
             }
           }
-        }
 
-        rolesReachableInOneOrMoreStepsMap[role] = visitedRoles;
+          rolesReachableInOneOrMoreStepsMap[role] = visitedRoles;
+        }
       }
     }
 
@@ -168,7 +171,7 @@ define(function (require) {
         }
 
         // retrieve the identity data from the server, update the identity object, and then resolve.
-        $http.get('/api/users/search/current?projection=authorities')
+        $http.get('auth/user')
           .then(function (account) {
             _identity = account.data;
             _useHierarchy = _identity.setting && _identity.setting.useHierarchy && _identity.setting.useHierarchy === true;

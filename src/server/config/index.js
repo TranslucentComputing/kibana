@@ -5,7 +5,14 @@ var path = require('path');
 var listPlugins = require('../lib/listPlugins');
 var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibana.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
+
+//This sets the kibana app ENV
 var env = process.env.NODE_ENV || 'development';
+
+//This sets what type of ENV will be used by kibana app
+var devEnv = process.env.DEV_ENV || 'local';
+
+var esURL = process.env.ES_URL || 'http://localhost:9200';
 
 function checkPath(path) {
   try {
@@ -19,7 +26,27 @@ function checkPath(path) {
 // Set defaults for config file stuff
 kibana.port = kibana.port || 5601;
 kibana.host = kibana.host || '0.0.0.0';
-kibana.elasticsearch_url = kibana.elasticsearch_url || 'http://localhost:9200';
+
+if (env === 'development') {
+  //Get the app configuration JSON file
+  var appConfigJson = require('../../../app.config.json');
+  var envConfig = appConfigJson[devEnv];
+
+  if (kibana.auth_url.indexOf('<AUTH_URL>') !== -1) {
+    kibana.auth_url = envConfig.tokenUri;
+  }
+
+  if (kibana.identity_url.indexOf('<IDENTITY_URL>') !== -1) {
+    kibana.identity_url = envConfig.baseUri;
+  }
+
+  kibana.elasticsearch_url = esURL;
+
+  console.log(kibana.auth_url);
+  console.log(kibana.identity_url);
+  console.log(kibana.elasticsearch_url);
+}
+
 kibana.maxSockets = kibana.maxSockets || Infinity;
 kibana.log_file = kibana.log_file || null;
 kibana.xsrf_token = kibana.xsrf_token || 'kibana';
@@ -46,24 +73,24 @@ try {
 }
 
 var config = module.exports = {
-  port                    : kibana.port,
-  host                    : kibana.host,
-  elasticsearch           : kibana.elasticsearch_url,
-  root                    : path.normalize(path.join(__dirname, '..')),
-  quiet                   : false,
-  public_folder           : public_folder,
-  external_plugins_folder : process.env.PLUGINS_FOLDER || null,
-  bundled_plugins_folder  : path.resolve(public_folder, 'plugins'),
-  kibana                  : kibana,
-  package                 : require(packagePath),
-  htpasswd                : htpasswdPath,
-  buildNum                : '@@buildNum',
-  maxSockets              : kibana.maxSockets,
-  log_file                : kibana.log_file,
-  request_timeout         : kibana.request_timeout,
-  ping_timeout            : kibana.ping_timeout,
-  token_url               : kibana.token_url,
-  api_url                 : kibana.api_url
+  port: kibana.port,
+  host: kibana.host,
+  elasticsearch: kibana.elasticsearch_url,
+  root: path.normalize(path.join(__dirname, '..')),
+  quiet: false,
+  public_folder: public_folder,
+  external_plugins_folder: process.env.PLUGINS_FOLDER || null,
+  bundled_plugins_folder: path.resolve(public_folder, 'plugins'),
+  kibana: kibana,
+  package: require(packagePath),
+  htpasswd: htpasswdPath,
+  buildNum: '@@buildNum',
+  maxSockets: kibana.maxSockets,
+  log_file: kibana.log_file,
+  request_timeout: kibana.request_timeout,
+  ping_timeout: kibana.ping_timeout,
+  auth_url: kibana.auth_url,
+  identity_url: kibana.identity_url
 };
 
 config.plugins = listPlugins(config);

@@ -13,7 +13,7 @@ define(function (require) {
           + encodeURIComponent(credentials.password) + '&grant_type=password&scope=read%20write&' +
           'client_secret=KibanaAppSecret&client_id=KibanaApp';
 
-        return $http.post(configFile.token_url, data, {
+        return $http.post('auth/token', data, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
@@ -34,7 +34,7 @@ define(function (require) {
 
         Principal.authenticate(null);
 
-        $http.get('/api/logout', {params: {sessionKey: sessionKey}}).then(function () {
+        $http.get('auth/logout', {params: {sessionKey: sessionKey}}).then(function () {
           TokenManager.clearAll();
           $rootScope.$broadcast('loggedOut');
           kbnUrl.change('/login');

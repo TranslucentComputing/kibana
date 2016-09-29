@@ -1,18 +1,11 @@
-/**
- * Created by Daniel Costa <daniel@translucentcomputing.com> on 7/8/2016.
- */
 define(function (require) {
 
   var app = require('modules').get('kibana');
 
-  app.factory('AuthInterceptor', function ($q, $injector, TokenManager, configFile) {
+  app.factory('AuthInterceptor', function ($q, $injector, TokenManager) {
     var authInterceptorServiceFactory = {};
 
     var _request = function (config) {
-      //update url for api calls
-      if (/^\/api\//.test(config.url)) {
-        config.url = configFile.api_url + config.url;
-      }
 
       config.headers = config.headers || {};
       var token = TokenManager.getToken();

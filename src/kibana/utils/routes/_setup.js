@@ -1,5 +1,5 @@
 define(function (require) {
-  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope, Principal) {
+  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, courier, Notifier, Private, $rootScope, Principal, $location) {
     var _ = require('lodash');
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
@@ -50,8 +50,13 @@ define(function (require) {
           // after reporting it to the user
 
           var showError = true;
+
           if (Principal.isIdentityResolved()) { //Even if there are no indices define if the user is not logged in redirect to login page
-            kbnUrl.change('/settings/indices');
+
+            if ($location.path().indexOf('/settings/indices') === -1 && $location.path().indexOf('/login') === -1 ) { //change only if not already in the section
+              kbnUrl.change('/settings/indices');
+            }
+
           }
           else {
             showError = false;

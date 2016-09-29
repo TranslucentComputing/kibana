@@ -1,7 +1,6 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var requestLogger = require('./lib/requestLogger');
 var auth = require('./lib/auth');
 var xsrf = require('./lib/xsrf');
 var appHeaders = require('./lib/appHeaders');
@@ -12,15 +11,19 @@ var config = require('./config');
 
 var routes = require('./routes/index');
 var proxy = require('./routes/proxy');
+var authRoutes = require('./routes/auth');
+
+var morgan = require('morgan');
 
 var app = express();
+
+app.use(morgan('combined'));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('x-powered-by', false);
 
-app.use(requestLogger());
 app.use(auth());
 app.use(xsrf(config.kibana.xsrf_token));
 app.use(appHeaders());
@@ -35,6 +38,8 @@ if (app.get('env') === 'development') {
 // so we don't have weird conflicts in the future.
 app.use('/elasticsearch', proxy);
 
+app.use('/auth', authRoutes);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -43,7 +48,6 @@ app.use(express.static(config.public_folder));
 if (config.external_plugins_folder) app.use('/plugins', express.static(config.external_plugins_folder));
 
 app.use('/', routes);
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

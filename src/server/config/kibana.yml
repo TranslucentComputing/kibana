@@ -5,11 +5,13 @@ port: 5601
 host: "0.0.0.0"
 
 # The Elasticsearch instance to use for all your queries.
-elasticsearch_url: "http://192.168.50.4:9200"
+elasticsearch_url: '<ES_URL>'
 
-token_url: "http://localhost:8080/oauth/token"
+# Token service
+auth_url: '<AUTH_URL>'
 
-api_url: "http://localhost:8080"
+# User identity service
+identity_url: '<IDENTITY_URL>'
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -17,7 +19,7 @@ elasticsearch_preserve_host: true
 
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations
 # and dashboards. It will create a new index if it doesn't already exist.
-kibana_index: ".kibana"
+kibana_index: "kibana"
 
 # If your Elasticsearch is protected with basic auth, this is the user credentials
 # used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana

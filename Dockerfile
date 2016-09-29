@@ -36,10 +36,6 @@ ENV KIBANA_VERSION 4.1.9
 
 COPY /build/dist/kibana-${KIBANA_VERSION}-linux-x64 /opt/kibana
 
-# ensure the default configuration is useful when using --link
-RUN sed -ri "s!^(\#\s*)?(elasticsearch_url:).*!\2 'http://elasticsearch:9200'!" /opt/kibana/config/kibana.yml \
-	&& grep -q 'elasticsearch:9200' /opt/kibana/config/kibana.yml
-
 ENV PATH /opt/kibana/bin:$PATH
 
 COPY docker-entrypoint.sh /
