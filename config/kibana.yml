@@ -1,5 +1,16 @@
 # Kibana is served by a back end server. This controls which port to use.
-# server.port: 5601
+server.port: 5601
+
+elasticsearch.url: "http://localhost:9200"
+
+shield.encryptionKey: 02965ab9f37c4f7dbdff14a310fcc45c
+shield.cookieName: tekstack-kibana
+shield.clientId: KibanaApp
+shield.clientSecret: KibanaAppSecret
+#30 min
+shield.sessionTimeout: 1800000
+shield.url: "http://localhost:8080/oauth/token"
+shield.userUrl: "http://localhost/api/users/search/current?projection=authorities"
 
 # The host to bind the server to.
 # server.host: "0.0.0.0"
@@ -11,19 +22,17 @@
 # The maximum payload size in bytes on incoming server requests.
 # server.maxPayloadBytes: 1048576
 
-# The Elasticsearch instance to use for all your queries.
-# elasticsearch.url: "http://localhost:9200"
-
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
 # elasticsearch.preserveHost: true
 
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations
 # and dashboards. It will create a new index if it doesn't already exist.
-# kibana.index: ".kibana"
+kibana.index: "kibana"
 
 # The default application to load.
-# kibana.defaultAppId: "discover"
+kibana.defaultAppId: "discover"
+kibana.loadApps: false
 
 # If your Elasticsearch is protected with basic auth, these are the user credentials
 # used by the Kibana server to perform maintenance on the kibana_index at startup. Your Kibana

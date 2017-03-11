@@ -48,10 +48,14 @@ module.exports = async (kbnServer, server, config) => {
     method: 'GET',
     handler: function (req, reply) {
       const id = req.params.id;
-      const app = uiExports.apps.byId[id];
+      let app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
+
+        //user to the app object
+        app.user = req.auth.credentials;
+
         return reply.renderApp(app);
       } else {
         return reply.renderStatusPage();
@@ -60,8 +64,10 @@ module.exports = async (kbnServer, server, config) => {
   });
 
   server.decorate('reply', 'renderApp', function (app) {
+
     const payload = {
       app: app,
+      user: app.user, //add user to the payload
       nav: uiExports.apps,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
@@ -74,7 +80,7 @@ module.exports = async (kbnServer, server, config) => {
       app: app,
       loadingGif: loadingGif,
       kibanaPayload: payload,
-      bundlePath: `${config.get('server.basePath')}/bundles`,
+      bundlePath: `${config.get('server.basePath')}/bundles`
     });
   });
 };

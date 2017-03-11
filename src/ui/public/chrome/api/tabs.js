@@ -48,7 +48,16 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.setTabs = function (tabSpecs) {
-    internals.tabs.set(tabSpecs);
+    //remove tabs that user has no permission to see
+    if(internals.user && internals.user.authorities) {
+      internals.tabs.set(_.filter(tabSpecs, function (tab) {
+          return _.includes(internals.user.authorities, tab.authority);
+        })
+      );
+    }
+    else {
+      internals.tabs.set([]);
+    }
     return chrome;
   };
 

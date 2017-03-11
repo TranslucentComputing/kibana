@@ -7,11 +7,11 @@ module.exports = function (grunt) {
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
-    '_release:confirmUpload',
+    //'_release:confirmUpload',
     'build',
-    '_release:loadS3Config',
-    'aws_s3:staging',
-    '_release:complete'
+    //'_release:loadS3Config',
+    //'aws_s3:staging',
+    //'_release:complete'
   ]);
 
   grunt.registerTask('_release:confirmUpload', function () {

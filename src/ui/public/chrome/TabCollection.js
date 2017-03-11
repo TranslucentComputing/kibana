@@ -48,6 +48,14 @@ function TabCollection(opts = {}) {
     let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
     tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState));
   };
+
+  //check if a tab with given tab id exits in the tabs array
+  this.noAccess = function(tabId){
+      var tab = _.find(tabs, function (tab) {
+          return tab.id == tabId;
+      });
+      return !tab
+  }
 }
 
 module.exports = TabCollection;

@@ -23,11 +23,20 @@ module.exports = function (chrome, internals) {
   };
 
   chrome.getShowAppsLink = function () {
-    return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
+    if(internals.app.id === 'kibana') { //hide and show the app selector for kibana app
+      return internals.showAppsLink == null ? false : internals.showAppsLink;
+    }
+    else { //other apps should have a way to return to kibana
+      return true;
+    }
   };
 
   chrome.getApp = function () {
     return clone(internals.app);
+  };
+
+  chrome.getAuthorities = function() {
+    return get(internals, ['user', 'authorities'])
   };
 
   chrome.getAppTitle = function () {

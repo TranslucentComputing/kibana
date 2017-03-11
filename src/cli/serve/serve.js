@@ -33,6 +33,8 @@ module.exports = function (program) {
   .description('Run the kibana server')
   .collectUnknownOptions()
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
+  .option('-tu, --tokenUrl <uri>', 'Token URL')
+  .option('-uu, --userUrl <uri>', 'User URL')
   .option(
     '-c, --config <path>',
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
@@ -43,6 +45,8 @@ module.exports = function (program) {
   .option('--verbose', 'Turns on verbose logging')
   .option('-H, --host <host>', 'The host to bind to')
   .option('-l, --log-file <path>', 'The file to log to')
+  .option('-ap, --loadApps','Load apps')
+  .option('-da, --defaultAppId <appId>','Default App Id for Kibana')
   .option(
     '--plugin-dir <path>',
     'A path to scan for plugins, this can be specified multiple ' +
@@ -98,10 +102,14 @@ module.exports = function (program) {
     if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
     if (opts.port) set('server.port', opts.port);
     if (opts.host) set('server.host', opts.host);
+    if (opts.tokenUrl) set('shield.url', opts.tokenUrl);
+    if (opts.userUrl) set('shield.userUrl', opts.userUrl);
     if (opts.quiet) set('logging.quiet', true);
     if (opts.silent) set('logging.silent', true);
     if (opts.verbose) set('logging.verbose', true);
     if (opts.logFile) set('logging.dest', opts.logFile);
+    if (opts.loadApps) set('kibana.loadApps', true);
+    if (opts.defaultAppId) set('kibana.defaultAppId', opts.defaultAppId);
 
     set('plugins.scanDirs', _.compact([].concat(
       get('plugins.scanDirs'),

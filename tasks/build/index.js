@@ -22,10 +22,10 @@ module.exports = function (grunt) {
       '_build:downloadNodeBuilds:finish',
       '_build:versionedLinks',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
-      grunt.option('skip-os-packages') ? [] : [
-        '_build:pleaseRun',
-        '_build:osPackages',
-      ],
+      //grunt.option('skip-os-packages') ? [] : [
+      //  '_build:pleaseRun',
+      //  '_build:osPackages',
+      //],
       '_build:shasums'
     ]));
   });

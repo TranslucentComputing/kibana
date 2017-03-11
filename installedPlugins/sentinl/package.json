@@ -1,0 +1,44 @@
+{
+  "author": "Lorenzo Mangani <lorenzo.mangani@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/sirensolutions/sentinl.git"
+  },
+  "name": "sentinl",
+  "version": "4.6.3-SNAPSHOT",
+  "description": "Kibana Alert & Report App for Elasticsearch",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint",
+    "precommit": "gulp lint",
+    "sentinl-install": "/opt/kibana/bin/kibi plugin --install sentinl -u file://`pwd`/sentinl-latest.tar.gz",
+    "sentinl-remove": "/opt/kibana/bin/kibi plugin --remove sentinl",
+    "package": "gulp package",
+    "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude .github --exclude gradle --exclude build --exclude target --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
+  },
+  "dependencies": {
+    "bluebird": "^3.0.6",
+    "later": "*",
+    "mustache": "*",
+    "emailjs": "*",
+    "node-slack": "*",
+    "node-horseman": "*",
+    "sum-time": "*"
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.11.1",
+    "eslint-plugin-mocha": "^4.7.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "^1.1.1",
+    "gulp-util": "^3.0.7",
+    "gulp-zip": "3.1.0",
+    "husky": "^0.10.2",
+    "lodash": "^3.10.1",
+    "minimist": "1.2.0",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.4.4",
+    "rsync": "^0.4.0"
+  },
+  "license": "Apache-2.0"
+}

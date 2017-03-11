@@ -34,24 +34,29 @@ chrome
 .setTabs([
   {
     id: 'discover',
-    title: 'Discover'
+    title: 'Discover',
+    authority: 'OP_KIBANA_DISCOVER'
   },
   {
     id: 'visualize',
     title: 'Visualize',
+    authority: 'OP_KIBANA_VISUALIZE',
     activeIndicatorColor: function () {
       return (String(this.lastUrl).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
     }
   },
   {
     id: 'dashboard',
-    title: 'Dashboard'
+    title: 'Dashboard',
+    authority: 'OP_KIBANA_DASHBOARD'
   },
   {
     id: 'settings',
-    title: 'Settings'
+    title: 'Settings',
+    authority: 'OP_KIBANA_SETTINGS'
   }
 ])
+.setShowAppsLink(chrome.getInjected('kbnLoadApps', false))
 .setRootController('kibana', function ($scope, $rootScope, courier, config) {
   function setDefaultTimezone() {
     moment.tz.setDefault(config.get('dateFormat:tz'));
