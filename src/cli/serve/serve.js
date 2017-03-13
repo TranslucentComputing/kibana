@@ -35,6 +35,7 @@ module.exports = function (program) {
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option('-tu, --tokenUrl <uri>', 'Token URL')
   .option('-uu, --userUrl <uri>', 'User URL')
+  .option('bp, --basePath <path>','Base Path')
   .option(
     '-c, --config <path>',
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
@@ -110,6 +111,7 @@ module.exports = function (program) {
     if (opts.logFile) set('logging.dest', opts.logFile);
     if (opts.loadApps) set('kibana.loadApps', true);
     if (opts.defaultAppId) set('kibana.defaultAppId', opts.defaultAppId);
+    if (opts.basePath) set('server.basePath',opts.basePath);
 
     set('plugins.scanDirs', _.compact([].concat(
       get('plugins.scanDirs'),
