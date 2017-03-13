@@ -18,7 +18,8 @@ module.exports = (kibana) => new kibana.Plugin({
       clientId: Joi.string(),
       clientSecret: Joi.string(),
       url: Joi.string().uri({ scheme: ['http', 'https'] }).required().description('Token URL'),
-      userUrl: Joi.string().uri({ scheme: ['http', 'https'] }).required().description('User URL')
+      userUrl: Joi.string().uri({ scheme: ['http', 'https'] }).required().description('User URL'),
+      isSecure: Joi.boolean().default(false)
     }).default();
   },
 
@@ -68,7 +69,7 @@ module.exports = (kibana) => new kibana.Plugin({
         password: config.get('shield.encryptionKey'),
         path: config.get('server.basePath') + '/',
         clearInvalid: true,
-        isSecure: false,
+        isSecure: config.get('shield.isSecure'),
         redirectTo: '/login',
         validateFunc: root('server/lib/validate_cookie')(server)
       });

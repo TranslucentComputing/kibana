@@ -11,6 +11,7 @@ shield.clientSecret: KibanaAppSecret
 shield.sessionTimeout: 1800000
 shield.url: "http://localhost:8080/oauth/token"
 shield.userUrl: "http://localhost/api/users/search/current?projection=authorities"
+shield.isSecure: false
 
 # The host to bind the server to.
 # server.host: "0.0.0.0"
