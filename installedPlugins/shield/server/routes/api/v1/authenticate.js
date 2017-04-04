@@ -59,7 +59,6 @@ module.exports = (server) => {
             }
             else if (res.statusCode > 401) {
               request.auth.session.clear();
-              var error = new Error('Error');
               return reply(Boom.wrap(error, res.statusCode));
             }
             else {

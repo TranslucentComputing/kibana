@@ -4,6 +4,7 @@ import { Agent as HttpsAgent } from 'https'
 import { readFileSync } from 'fs'
 
 import { WildcardMatcher } from './wildcard_matcher'
+var path = require("path");
 
 const makeHttpsAgent = memoize(
   opts => new HttpsAgent(opts),
@@ -43,8 +44,14 @@ export class ProxyConfig {
     const ssl = config.ssl || {};
     this.verifySsl = ssl.verify;
 
+    if(ssl.ca) {
+      var configPath = path.join(__dirname, '..','..','..', 'config');
+      console.log("path:" + configPath);
+      ssl.ca = readFileSync(configPath+'/'+ssl.ca);
+    }
+
     const sslAgentOpts = {
-      ca: ssl.ca && ssl.ca.map(ca => readFileSync(ca)),
+      ca: ssl.ca,
       cert: ssl.cert && readFileSync(ssl.cert),
       key: ssl.key && readFileSync(ssl.key),
     };

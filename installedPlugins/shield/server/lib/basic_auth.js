@@ -1,5 +1,6 @@
 module.exports = {
   getHeader: getAuthHeader,
+  getKibanaUserAuthHeader: getKibanaUserAuthHeader,
   parseHeader: parseAuthHeader
 };
 
@@ -8,9 +9,17 @@ function getAuthHeader(clientId, clientSecret) {
   const auth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');
 
   return {
-    "Authorization": `Basic ${auth}`,
-    "Content-Type": "application/x-www-form-urlencoded",
-    "Accept": "application/json"
+    "authorization": `Basic ${auth}`,
+    "content-type": "application/x-www-form-urlencoded",
+    "accept": "application/json"
+  };
+}
+
+function getKibanaUserAuthHeader(username,password) {
+  const authHeader = new Buffer(`${username}:${password}`).toString('base64');
+
+  return {
+    'authorization': `Basic ${authHeader}`
   };
 }
 

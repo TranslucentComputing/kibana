@@ -40,7 +40,6 @@ ENV KIBANA_MAJOR 4.6
 ENV KIBANA_VERSION 4.6.5
 
 COPY /build/kibana-${KIBANA_VERSION}-SNAPSHOT-linux-x86_64 /opt/kibana
-COPY /installedPlugins /opt/kibana/installedPlugins
 
 RUN set -x \
 	&& chown -R kibana:kibana /opt/kibana \

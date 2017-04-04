@@ -9,7 +9,7 @@ module.exports = function (grunt) {
       'copy:devSource',
       'babel:build',
       '_build:babelOptions',
-      '_build:installedPlugins',
+      //'_build:installedPlugins',
       '_build:data',
       '_build:packageJson',
       '_build:readme',

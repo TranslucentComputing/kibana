@@ -12,6 +12,11 @@ if [ "$1" = 'kibana' ]; then
 		sed -ri "s!^(\#\s*)?(elasticsearch\.url:).*!\2 '$ELASTICSEARCH_URL'!" /opt/kibana/config/kibana.yml
 	fi
 
+  #Reomve sense for security reason, only used it in dev
+  if [ "$RUN_ENV" != "DEV" ]; then
+     kibana plugin --remove sense
+  fi
+
 	set -- gosu kibana tini -- "$@"
 fi
 

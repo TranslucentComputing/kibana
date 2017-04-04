@@ -3,6 +3,7 @@ const _ = require('lodash');
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 const http = require('http');
 const https = require('https');
+import fromRoot from '../../../utils/fromRoot';
 
 module.exports = _.memoize(function (server) {
   const config = server.config();
@@ -15,7 +16,8 @@ module.exports = _.memoize(function (server) {
   };
 
   if (_.size(config.get('elasticsearch.ssl.ca'))) {
-    agentOptions.ca = config.get('elasticsearch.ssl.ca').map(readFile);
+    let path = fromRoot('config/'+config.get('elasticsearch.ssl.ca'));
+    agentOptions.ca = readFile(path);
   }
 
   // Add client certificate and key if required by elasticsearch

@@ -7,6 +7,8 @@ module.exports = function (grunt) {
         'bin/**',
         'webpackShims/**',
         'config/kibana.yml',
+        'config/chain-ca.pem',
+        'installedPlugins/**',
         '!src/**/__tests__/**',
         '!src/testUtils/**',
         '!src/fixtures/**',

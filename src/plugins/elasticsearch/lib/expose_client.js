@@ -4,6 +4,7 @@ const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 const util = require('util');
 const url = require('url');
 const callWithRequest = require('./call_with_request');
+import fromRoot from '../../../utils/fromRoot';
 
 module.exports = function (server) {
   const config = server.config();
@@ -37,7 +38,8 @@ module.exports = function (server) {
       ssl.key = readFile(options.clientKey);
     }
     if (options.ca) {
-      ssl.ca = options.ca.map(readFile);
+      let path = fromRoot('config/'+options.ca);
+      ssl.ca = readFile(path);
     }
 
     const host = {

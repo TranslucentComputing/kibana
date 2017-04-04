@@ -4,6 +4,8 @@ const hapiAuthCookie = require('hapi-auth-cookie');
 const root = require('requirefrom')('');
 const validateConfig = root('server/lib/validate_config');
 const createScheme = root('server/lib/login_scheme');
+const basicAuth = root('server/lib/basic_auth');
+const _ = require('lodash');
 
 module.exports = (kibana) => new kibana.Plugin({
   name: 'shield',
@@ -17,9 +19,11 @@ module.exports = (kibana) => new kibana.Plugin({
       sessionTimeout: Joi.number().default(30 * 60 * 1000),
       clientId: Joi.string(),
       clientSecret: Joi.string(),
-      url: Joi.string().uri({ scheme: ['http', 'https'] }).required().description('Token URL'),
-      userUrl: Joi.string().uri({ scheme: ['http', 'https'] }).required().description('User URL'),
-      isSecure: Joi.boolean().default(false)
+      url: Joi.string().uri({scheme: ['http', 'https']}).required().description('Token URL'),
+      userUrl: Joi.string().uri({scheme: ['http', 'https']}).required().description('User URL'),
+      isSecure: Joi.boolean().default(false),
+      user: Joi.string().required(),
+      password: Joi.string().required()
     }).default();
   },
 
@@ -74,6 +78,17 @@ module.exports = (kibana) => new kibana.Plugin({
         validateFunc: root('server/lib/validate_cookie')(server)
       });
     });
+
+    const kibanaUserHeaders = basicAuth.getKibanaUserAuthHeader(config.get('shield.user'), config.get('shield.password'));
+
+    server.ext('onPostAuth', function (request, next) {
+      if (request.auth && request.auth.isAuthenticated) {
+        _.assign(request.headers, kibanaUserHeaders);
+        _.set(request, 'headers', _.omit(request.headers, 'origin')); //remove origin header causes issues
+      }
+      return next.continue();
+    });
+
 
     root('server/routes/api/v1/authenticate')(server);
     root('server/routes/views/login')(server, this);
