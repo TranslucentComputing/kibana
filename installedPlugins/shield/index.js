@@ -62,7 +62,7 @@ module.exports = (kibana) => new kibana.Plugin({
       register(hapiAuthCookie)
     ]).then(() => {
       server.auth.scheme('login', createScheme({
-        redirectUrl: (path) => loginUrl(config.get('server.basePath'), path),
+        redirectUrl: () => loginUrl(config.get('server.basePath'), config.get('kibana.defaultAppId')),
         strategies: ['shield-cookie']
       }));
 

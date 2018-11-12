@@ -12,7 +12,7 @@ require('ui/chrome')
     kibanaLogoUrl,
     submit(username, password) {
       $http.post('./api/shield/v1/login',{username,password}).then(
-        (response) => window.location.href = `.${next}`,
+        (response) => window.location.href = `${next}`,
         (error) => this.error = true
       );
     }
